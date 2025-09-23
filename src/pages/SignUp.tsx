@@ -6,32 +6,54 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
-const SignIn = () => {
+const SignUp = () => {
   const navigate = useNavigate();
-  const { login, googleLogin } = useAuth();
+  const { signUp, googleLogin } = useAuth();
   const { toast } = useToast();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: ""
+  });
   const [loading, setLoading] = useState(false);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    // Basic validation
-    if (!email) {
+    // Validation
+    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
       toast({
         title: "Error",
-        description: "Email is required",
+        description: "All fields are required",
         variant: "destructive"
       });
       setLoading(false);
       return;
     }
-    if (!password) {
+
+    if (formData.password !== formData.confirmPassword) {
       toast({
         title: "Error",
-        description: "Password is required",
+        description: "Passwords do not match",
+        variant: "destructive"
+      });
+      setLoading(false);
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long",
         variant: "destructive"
       });
       setLoading(false);
@@ -39,14 +61,14 @@ const SignIn = () => {
     }
 
     try {
-      await login(email, password);
+      await signUp(formData.email, formData.password);
       toast({
         title: "Success",
-        description: "Signed in successfully!",
+        description: "Account created successfully!",
       });
       navigate("/dashboard");
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to sign in";
+      const errorMessage = error instanceof Error ? error.message : "Failed to create account";
       toast({
         title: "Error",
         description: errorMessage,
@@ -81,18 +103,33 @@ const SignIn = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
-        <h2 className="text-2xl font-bold mb-6 text-center">Sign In</h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <h2 className="text-2xl font-bold mb-6 text-center">Sign Up</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="name" className="block mb-1 font-medium">
+              Full Name
+            </Label>
+            <Input
+              id="name"
+              name="name"
+              type="text"
+              placeholder="Enter your full name"
+              value={formData.name}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
           <div>
             <Label htmlFor="email" className="block mb-1 font-medium">
               Email
             </Label>
             <Input
               id="email"
+              name="email"
               type="email"
               placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={handleInputChange}
               required
             />
           </div>
@@ -102,15 +139,30 @@ const SignIn = () => {
             </Label>
             <Input
               id="password"
+              name="password"
               type="password"
               placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={formData.password}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="confirmPassword" className="block mb-1 font-medium">
+              Confirm Password
+            </Label>
+            <Input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              placeholder="Confirm your password"
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
               required
             />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Signing In..." : "Sign In"}
+            {loading ? "Creating Account..." : "Sign Up"}
           </Button>
         </form>
 
@@ -122,14 +174,14 @@ const SignIn = () => {
             onClick={handleGoogleLogin}
             disabled={loading}
           >
-            Sign In with Google
+            Sign Up with Google
           </Button>
         </div>
 
         <p className="mt-4 text-center text-sm">
-          Don't have an account?{" "}
-          <Link to="/signup" className="text-blue-600 hover:underline">
-            Sign Up
+          Already have an account?{" "}
+          <Link to="/signin" className="text-blue-600 hover:underline">
+            Sign In
           </Link>
         </p>
       </div>
@@ -137,4 +189,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default SignUp;

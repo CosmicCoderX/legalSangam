@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Select,
   SelectContent,
@@ -14,11 +15,31 @@ import {
   languageNames,
   Language,
 } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { currentLanguage, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
+  const { currentUser, logout } = useAuth();
+
+  const getUserInitial = () => {
+    if (currentUser?.displayName) {
+      return currentUser.displayName.charAt(0).toUpperCase();
+    } else if (currentUser?.email) {
+      return currentUser.email.charAt(0).toUpperCase();
+    }
+    return "U";
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -81,20 +102,39 @@ const Navbar = () => {
                 ))}
               </SelectContent>
             </Select>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/signin")}
-            >
-              {t("signIn")}
-            </Button>
-            <Button
-              size="sm"
-              className="bg-gradient-hero shadow-soft hover:shadow-medium transition-all"
-              onClick={() => navigate("/services")}
-            >
-              {t("getStarted")}
-            </Button>
+            {currentUser ? (
+              <>
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                    {getUserInitial()}
+                  </AvatarFallback>
+                </Avatar>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/signin")}
+                >
+                  {t("signIn")}
+                </Button>
+                <Button
+                  size="sm"
+                  className="bg-gradient-hero shadow-soft hover:shadow-medium transition-all"
+                  onClick={() => navigate("/services")}
+                >
+                  {t("getStarted")}
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -158,19 +198,43 @@ const Navbar = () => {
                     ))}
                   </SelectContent>
                 </Select>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start"
-                  onClick={() => navigate("/signin")}
-                >
-                  {t("signIn")}
-                </Button>
-                <Button
-                  className="w-full bg-gradient-hero shadow-soft"
-                  onClick={() => navigate("/services")}
-                >
-                  {t("getStarted")}
-                </Button>
+                {currentUser ? (
+                  <>
+                    <div className="flex items-center space-x-3 px-3 py-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                          {getUserInitial()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm font-medium">
+                        {currentUser.displayName || currentUser.email}
+                      </span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={() => navigate("/signin")}
+                    >
+                      {t("signIn")}
+                    </Button>
+                    <Button
+                      className="w-full bg-gradient-hero shadow-soft"
+                      onClick={() => navigate("/services")}
+                    >
+                      {t("getStarted")}
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </div>
