@@ -547,7 +547,7 @@ const FindLawyers = () => {
                           className="w-full"
                           disabled={!lawyer.available}
                           onClick={() =>
-                            navigate(`/payments?lawyer=${lawyer.id}`)
+                            navigate("/booking", { state: { lawyer } })
                           }
                         >
                           <Calendar className="w-4 h-4 mr-2" />

@@ -14,7 +14,7 @@ import { db } from "../lib/firebase";
 // Listen to real-time escrow transactions for a specific client
 export const listenToEscrows = (
   clientId: string,
-  callback: (escrows: any[]) => void
+  callback: (escrows: unknown[]) => void
 ) => {
   const q = query(
     collection(db, "escrowTransactions"),
@@ -39,7 +39,7 @@ export const createEscrow = async (escrowData: {
   providerId: string;
   amount: number;
   status: string;
-  milestones?: any[];
+  milestones?: unknown[];
 }) => {
   try {
     const docRef = await addDoc(collection(db, "escrowTransactions"), {

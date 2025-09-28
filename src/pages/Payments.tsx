@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -27,6 +27,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const Payments = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -255,7 +256,22 @@ const Payments = () => {
     // Simulate payment processing
     setTimeout(() => {
       setIsProcessing(false);
-      // Handle success/failure
+      // Generate roomID and navigate to success
+      const roomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      // Assuming bookingData is passed via state or from URL
+      const bookingData = {
+        lawyer: selectedLawyer,
+        date: consultationDetails.date,
+        time: consultationDetails.time,
+        duration: consultationDetails.duration,
+        type: consultationDetails.type,
+        fee: consultationDetails.fee,
+        platformFee: consultationDetails.platformFee,
+        gst: consultationDetails.gst,
+        total: consultationDetails.total,
+      };
+      // Navigate to booking success
+      navigate("/booking-success", { state: { roomID, bookingData } });
     }, 3000);
   };
 
