@@ -147,3 +147,62 @@ All colors MUST be HSL.
     font-family: var(--font-family-sans);
   }
 }
+
+/* Background Video Styles for Homepage */
+.video-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  transition: transform 0.4s ease; /* Smooth transform effect */
+  will-change: transform; /* Optimize for performance on hover */
+  animation: gentleZoom 20s ease-in-out infinite; /* Subtle zoom animation for dynamic visuals */
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.4) 0%,
+    rgba(0, 0, 0, 0.7) 50%,
+    rgba(0, 0, 0, 0.8) 100%
+  ); /* Gradient overlay for depth and better text visibility */
+  z-index: 1;
+  transition: opacity 0.4s ease; /* Smooth darken effect on hover */
+}
+
+.hero-section:hover .video-background {
+  transform: scale(1.01); /* Zoom effect on hover */
+}
+
+.hero-section:hover .hero-overlay {
+  opacity: 0.8; /* Darken the video on hover by increasing overlay */
+}
+
+.home-content {
+  position: relative;
+  z-index: 20;
+  /* No background overlay to let video show through more */
+}
+
+/* Enhanced text visibility over video */
+.hero-text {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); /* Strong shadow for better readability */
+}
+
+/* Keyframes for subtle video zoom animation */
+@keyframes gentleZoom {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}

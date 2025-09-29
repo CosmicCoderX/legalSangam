@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { getChatbotResponse } from "../services/chatbotService";
 
 type Msg = { sender: "bot" | "user"; text: string };
 
@@ -34,6 +35,7 @@ const Chatbot: React.FC = () => {
     { sender: "bot", text: "Hello! I’m AskCounsel. How can I help you today?" },
   ]);
   const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const listRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -43,20 +45,28 @@ const Chatbot: React.FC = () => {
     });
   }, [messages, open]);
 
-  const send = () => {
-    if (!input.trim()) return;
-    setMessages((m) => [...m, { sender: "user", text: input }]);
-    // dummy bot reply
-    setTimeout(() => {
+  const send = async () => {
+    if (!input.trim() || isLoading) return;
+    const userMessage = input.trim();
+    setInput("");
+    setMessages((m) => [...m, { sender: "user", text: userMessage }]);
+    setIsLoading(true);
+
+    try {
+      const botResponse = await getChatbotResponse(userMessage);
+      setMessages((m) => [...m, { sender: "bot", text: botResponse }]);
+    } catch (error) {
+      console.error("Error getting chatbot response:", error);
       setMessages((m) => [
         ...m,
         {
           sender: "bot",
-          text: "Thanks — a legal advisor will help you shortly. Meanwhile, try Document Review or Find Lawyers.",
+          text: "Sorry, I'm having trouble connecting right now. Please try again later or contact support.",
         },
       ]);
-    }, 700);
-    setInput("");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // minimal speech-to-text (browser)
@@ -124,6 +134,11 @@ const Chatbot: React.FC = () => {
                 {m.text}
               </div>
             ))}
+            {isLoading && (
+              <div className="max-w-[85%] rounded-xl p-4 text-base animate-fade-in bg-muted text-muted-foreground self-start">
+                typing...
+              </div>
+            )}
           </div>
 
           {/* Input Area with Better Layout */}
