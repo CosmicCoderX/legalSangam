@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, PhoneOff } from "lucide-react";
+import { getFunctions, httpsCallable, connectFunctionsEmulator } from 'firebase/functions';
+import { getAuth } from 'firebase/auth';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
@@ -28,71 +30,92 @@ const VideoCall = () => {
   const roomID = paramRoomID || location.state?.roomID;
   const effectiveRoomID = roomID;
 
+  // useEffect(() => {
+  //   const functions = getFunctions();
+  //   connectFunctionsEmulator(functions, '127.0.0.1', 5001);
+  // }, []);
+
   useEffect(() => {
     if (!effectiveRoomID) {
       navigate("/find");
       return;
     }
 
-    const initializeVideoCall = () => {
+    const initializeVideoCall = async () => {
       if (!window.ZegoUIKitPrebuilt || !containerRef.current) return;
 
-      const appID = 642713127;
-      const serverSecret = "8760851a8177d375dd756eb1e789f63c";
-      const userID = Math.floor(Math.random() * 10000) + "";
-      const userName = "User_" + userID;
+      try {
+        // For local testing, use hardcoded token generation (remove in production)
+        const auth = getAuth();
+        const user = auth.currentUser;
+        const userID = user ? user.uid : Math.floor(Math.random() * 10000) + "";
+        const userName = user ? user.displayName || user.email || "User_" + userID : "User_" + userID;
+        const appID = 385548480;
+        const serverSecret = "05cb1b9853ff76b184bdaa772c1851ef";
+        const kitToken = window.ZegoUIKitPrebuilt.generateKitTokenForTest(appID, serverSecret, effectiveRoomID, userID, userName);
 
-      const kitToken = window.ZegoUIKitPrebuilt.generateKitTokenForTest(appID, serverSecret, effectiveRoomID, userID, userName);
+        zpRef.current = window.ZegoUIKitPrebuilt.create(kitToken);
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const shareHost = isLocal ? '10.243.202.240:8080' : window.location.host;
+        const shareUrl = `http://${shareHost}/video-call?roomID=${effectiveRoomID}`;
 
-      zpRef.current = window.ZegoUIKitPrebuilt.create(kitToken);
-      zpRef.current.joinRoom({
-        container: containerRef.current,
-        sharedLinks: [{
-          name: 'Consultation Room',
-          url: window.location.protocol + '//' + window.location.host + '/video-call?roomID=' + effectiveRoomID,
-        }],
-        scenario: {
-          mode: window.ZegoUIKitPrebuilt.VideoConference,
-        },
-        turnOnMicrophoneWhenJoining: true,
-        turnOnCameraWhenJoining: true,
-        showMyCameraToggleButton: true,
-        showMyMicrophoneToggleButton: true,
-        showAudioVideoSettingsButton: true,
-        showScreenSharingButton: true,
-        showTextChat: true,
-        showUserList: true,
-        maxUsers: 2,
-        layout: "Auto",
-        showLayoutButton: false,
-        showLeaveRoomButton: false,
-        onCaptureVideoError: (error: unknown) => {
-          console.error('Video capture error:', error);
-          toast({
-            title: "Camera Access Issue",
-            description: "Please allow camera access in your browser settings and refresh the page.",
-            variant: "destructive",
-          });
-        },
-        onCaptureAudioError: (error: unknown) => {
-          console.error('Audio capture error:', error);
-          toast({
-            title: "Microphone Access Issue",
-            description: "Please allow microphone access in your browser settings and refresh the page.",
-            variant: "destructive",
-          });
-        },
-        onError: (error: unknown) => {
-          console.error('ZegoUIKit error:', error);
-          if ((error as any).type === 'media' || (error as any).message?.includes('permission') || (error as any).message?.includes('NotAllowed')) {
+        zpRef.current.joinRoom({
+          container: containerRef.current,
+          sharedLinks: [{
+            name: 'Consultation Room',
+            url: shareUrl,
+          }],
+          scenario: {
+            mode: window.ZegoUIKitPrebuilt.VideoConference,
+          },
+          turnOnMicrophoneWhenJoining: true,
+          turnOnCameraWhenJoining: true,
+          showMyCameraToggleButton: true,
+          showMyMicrophoneToggleButton: true,
+          showAudioVideoSettingsButton: true,
+          showScreenSharingButton: true,
+          showTextChat: true,
+          showUserList: true,
+          maxUsers: 2,
+          layout: "Auto",
+          showLayoutButton: false,
+          showLeaveRoomButton: false,
+          showJoinConfirmDialog: false,
+          onCaptureVideoError: (error: unknown) => {
+            console.error('Video capture error:', error);
             toast({
-              title: "Media Permission Denied",
-              description: "Camera or microphone access was blocked. Check browser settings and try again.",
+              title: "Camera Access Issue",
+              description: "Please allow camera access in your browser settings and refresh the page.",
               variant: "destructive",
             });
-          }
-        },
-      });
+          },
+          onCaptureAudioError: (error: unknown) => {
+            console.error('Audio capture error:', error);
+            toast({
+              title: "Microphone Access Issue",
+              description: "Please allow microphone access in your browser settings and refresh the page.",
+              variant: "destructive",
+            });
+          },
+          onError: (error: unknown) => {
+            console.error('ZegoUIKit error:', error);
+            if ((error as any).type === 'media' || (error as any).message?.includes('permission') || (error as any).message?.includes('NotAllowed')) {
+              toast({
+                title: "Media Permission Denied",
+                description: "Camera or microphone access was blocked. Check browser settings and try again.",
+                variant: "destructive",
+              });
+            }
+          },
+        });
+      } catch (error) {
+        console.error('Error initializing video call:', error);
+        toast({
+          title: "Video Call Initialization Failed",
+          description: "Unable to join the video call. Please try again.",
+          variant: "destructive",
+        });
+      }
     };
 
     // Load Zego script if not already loaded
@@ -147,11 +170,12 @@ const VideoCall = () => {
         </div>
 
         {/* Video Container */}
-        <div
-          ref={containerRef}
-          className="w-full h-[calc(100vh-200px)] bg-black rounded-lg overflow-hidden"
-          style={{ width: '100vw', height: '100vh', position: 'fixed', top: 0, left: 0, zIndex: 10 }}
-        ></div>
+        <div className="relative w-full h-[calc(100vh-200px)] rounded-lg overflow-hidden">
+          <div
+            ref={containerRef}
+            className="w-full h-full"
+          ></div>
+        </div>
 
       </div>
     </div>

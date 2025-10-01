@@ -4,6 +4,7 @@ import * as crypto from 'crypto';
 import Razorpay from 'razorpay';
 import OpenAI from 'openai';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import * as ZegoUIKitPrebuilt from '@zegocloud/zego-uikit-prebuilt';
 
 admin.initializeApp();
 
@@ -259,5 +260,30 @@ export const chatbot = functions.https.onCall(async (data, context) => {
   } catch (error) {
     console.error('Chatbot error:', error);
     throw new functions.https.HttpsError('internal', 'Failed to process query');
+  }
+});
+
+// Generate Zego token server-side for security
+export const generateZegoToken = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  }
+
+  const { roomID, userID, userName } = data;
+
+  if (!roomID || !userID || !userName) {
+    throw new functions.https.HttpsError('invalid-argument', 'roomID, userID, and userName are required');
+  }
+
+  try {
+    const appID = functions.config().zego?.app_id || 642713127;
+    const serverSecret = functions.config().zego?.server_secret || '8760851a8177d375dd756eb1e789f63c';
+
+    const token = ZegoUIKitPrebuilt.generateKitTokenForTest(appID, serverSecret, roomID, userID, userName);
+
+    return { token };
+  } catch (error) {
+    console.error('Zego token generation error:', error);
+    throw new functions.https.HttpsError('internal', 'Failed to generate token');
   }
 });

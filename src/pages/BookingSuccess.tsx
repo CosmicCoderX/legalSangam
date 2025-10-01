@@ -29,7 +29,7 @@ const BookingSuccess = () => {
     }
   };
 
-  const shareUrl = `https://legalsangam.web.app/video-call?roomID=${roomID}`;
+  const shareUrl = `${window.location.origin}/video-call?roomID=${roomID}`;
 
   const handleCopyLink = async () => {
     try {

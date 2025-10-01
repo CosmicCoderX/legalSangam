@@ -24,6 +24,8 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { getDatabase, ref, push, set } from 'firebase/database';
+import { getAuth } from 'firebase/auth';
 
 const Payments = () => {
   const [searchParams] = useSearchParams();
@@ -251,10 +253,10 @@ const Payments = () => {
     { id: "netbanking", name: "Net Banking", icon: Shield, popular: false },
   ];
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     setIsProcessing(true);
     // Simulate payment processing
-    setTimeout(() => {
+    setTimeout(async () => {
       setIsProcessing(false);
       // Generate roomID and navigate to success
       const roomID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -270,6 +272,29 @@ const Payments = () => {
         gst: consultationDetails.gst,
         total: consultationDetails.total,
       };
+
+      // Store booking data in Firebase
+      try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (user) {
+          const db = getDatabase();
+          const bookingRef = ref(db, `bookings/${user.uid}`);
+          const newBookingRef = push(bookingRef);
+          await set(newBookingRef, {
+            lawyerId: selectedLawyer?.id,
+            date: consultationDetails.date,
+            time: consultationDetails.time,
+            roomID,
+            status: 'confirmed',
+            createdAt: new Date().toISOString(),
+          });
+        }
+      } catch (error) {
+        console.error('Error storing booking:', error);
+        // Continue with navigation even if storage fails
+      }
+
       // Navigate to booking success
       navigate("/booking-success", { state: { roomID, bookingData } });
     }, 3000);
