@@ -15,7 +15,7 @@ Users can easily find advocates, explore their profiles, check ratings, and get 
 
 ## 🏗️ Tech Stack
 - **Frontend:** React + TypeScript + Tailwind CSS  
-- **Backend & Operations:** Firebase (JavaScript SDK)  
+- **Backend & Operations:** Firebase (JavaScript SDK) + Agentic AI ChatBot(by Botpress)
 - **Authentication:** Firebase Auth  
 - **Hosting:** Firebase Hosting  
 
