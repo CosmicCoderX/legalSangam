@@ -1,0 +1,5 @@
+- [x] Update firebaseConfig in src/lib/firebase.ts to include databaseURL and match the provided configuration
+- [ ] Commit changes to git
+- [ ] Push to GitHub repository
+- [ ] Build the project using npm run build
+- [ ] Deploy to Firebase Hosting using firebase deploy --only hosting
