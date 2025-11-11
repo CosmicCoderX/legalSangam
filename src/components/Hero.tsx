@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, Users, Scale, CheckCircle } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Hero = () => {
+  const { t } = useLanguage();
+
   return (
     <section className="hero-section relative min-h-screen flex items-center bg-background group">
       {/* Video Background */}
@@ -20,7 +23,7 @@ const Hero = () => {
         <div className="text-center max-w-4xl mx-auto">
           {/* Main headline */}
           <h1 className="hero-text text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
-            Find India’s Top Legal Experts in Minutes
+            {t('heroTitle')} {t('heroTitleHighlight')} {t('heroTitleEnd')}
           </h1>
 
           {/* Description */}
@@ -29,9 +32,7 @@ const Hero = () => {
               Connecting You to Trusted Legal Experts.
             </p>
             <p className="hero-text text-lg md:text-xl text-white/95">
-              Connect with verified lawyers across India. Get instant legal
-              advice, document review, and consultation booking - all in one
-              trusted platform.
+              {t('heroDescription')}
             </p>
           </div>
 
@@ -42,7 +43,7 @@ const Hero = () => {
                 size="lg"
                 className="bg-gradient-hero shadow-large hover:shadow-xl transition-all transform hover:scale-105 text-lg px-8 py-6"
               >
-                Find Legal Help
+                {t('findLegalHelp')}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
@@ -52,7 +53,7 @@ const Hero = () => {
                 size="lg"
                 className="border-white bg-black/30 text-white hover:bg-white hover:text-black transition-all text-lg px-8 py-6 backdrop-blur-sm"
               >
-                Browse Lawyers
+                {t('browseLawyers')}
               </Button>
             </Link>
           </div>
@@ -62,22 +63,22 @@ const Hero = () => {
             <div className="flex items-center justify-center space-x-3 p-4 rounded-lg bg-[#1a1a1a] shadow-soft backdrop-blur-sm">
               <Users className="w-8 h-8 text-yellow-400" />
               <div className="text-left">
-                <div className="font-semibold text-yellow-400">5000+</div>
-                <div className="text-sm text-white">Verified Lawyers</div>
+                <div className="font-semibold text-yellow-400">{t('lawyersCount')}</div>
+                <div className="text-sm text-white">{t('verifiedProfessionals')}</div>
               </div>
             </div>
             <div className="flex items-center justify-center space-x-3 p-4 rounded-lg bg-[#1a1a1a] shadow-soft backdrop-blur-sm">
               <Scale className="w-8 h-8 text-yellow-400" />
               <div className="text-left">
-                <div className="font-semibold text-yellow-400">50+</div>
-                <div className="text-sm text-white">Legal Areas</div>
+                <div className="font-semibold text-yellow-400">{t('legalAreas')}</div>
+                <div className="text-sm text-white">{t('expertCoverage')}</div>
               </div>
             </div>
             <div className="flex items-center justify-center space-x-3 p-4 rounded-lg bg-[#1a1a1a] shadow-soft backdrop-blur-sm">
               <CheckCircle className="w-8 h-8 text-yellow-400" />
               <div className="text-left">
-                <div className="font-semibold text-yellow-400">98%</div>
-                <div className="text-sm text-white">Client Satisfaction</div>
+                <div className="font-semibold text-yellow-400">{t('successRate')}</div>
+                <div className="text-sm text-white">{t('clientSatisfaction')}</div>
               </div>
             </div>
           </div>

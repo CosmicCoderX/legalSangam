@@ -29,7 +29,6 @@ const LawyerDetails = lazy(() => import("./pages/LawyerDetails"));
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import Chatbot from "./components/Chatbot";
 import Loading from "./components/Loading";
 
 const queryClient = new QueryClient();
@@ -75,9 +74,6 @@ const AppContent = () => {
 
       {/* Global Footer */}
       <Footer />
-
-      {/* Floating Chatbot */}
-      <Chatbot />
     </div>
   );
 };
